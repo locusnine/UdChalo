@@ -27,7 +27,7 @@ Webhook Event Type: `PUSH`
 
 Start a build under these conditions: `HEAD_REF` = `refs/heads/master`
 
-Environment Image: `aws/codebuild/nodejs:8.11.0-1.3.0`
+Environment Image: `AWS Managed` > `Ubuntu` > `Standard Image 2.0`
 
 `Enable Cloudwatch logs`
 
