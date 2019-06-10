@@ -2,11 +2,14 @@ version: 0.2
 
 phases:
     install:
+         runtime-versions:
+             nodejs: 8
          commands:
             - npm install -g serverless@1.37.1
     build:
          commands:
             - npm install
+            - npm run build
     post_build:
          commands:
             - env="dev"
