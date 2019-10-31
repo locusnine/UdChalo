@@ -1,17 +1,21 @@
-service: ${opt:product}
+service: ${self:provider.environment.product}
+
 provider:
   name: aws
-  runtime: nodejs8.10
-  stage: ${opt:stage} #read from console input
-  region: ${opt:region}
+  runtime: nodejs10.x
+  stage: ${opt:stage, 'local'} #read from console input
+  region: ${opt:region, 'ap-south-1'}
   memorySize: 128 # Overwrite the default memory size. Default is 1024
   timeout: 100 #default is 6
+
   environment:
-    awsRegion: ${opt:region}
-    storageTableName: ${opt:stage}-storage
+    awsRegion: ${self:provider.region}
+    storageTableName: ${self:provider.stage}-storage
+    product: ${opt:product, 'development'}
+
   versionFunctions: false
   stackTags:
-   Environment: ${opt:stage}
+    Environment: ${self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -21,47 +25,49 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-        - dynamodb:BatchGetItem 
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.storageTableName}*"
+        - dynamodb:BatchGetItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.storageTableName}*"
+
+plugins:
+  - serverless-offline
+
 functions:
-  Api: 
-    name: ${opt:product}-${opt:stage}-api
+  Api:
+    name: ${self:provider.environment.product}-${self:provider.stage}-api
     handler: build/src/lambda.handler
     package:
       include:
         - build/src/**
         - node_modules/**
     environment:
-      sampleKey: 'sampleValue'
+      sampleKey: "sampleValue"
     events:
       - http:
           path: /{proxy+}
           method: any
           cors:
-              origins:
-                - '*'
-              headers:
-                - Content-Type
-                - X-Amz-Date
-                - Authorization
-                - X-Api-Key
-                - X-Amz-Security-Token
-              allowCredentials: true
-
+            origins:
+              - "*"
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: true
 # The "Resources" your "Functions" use.  Raw AWS CloudFormation goes in here.
-resources:
-  Resources:
-    usersTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${opt:stage}-storage
-        AttributeDefinitions:
-          - AttributeName: Id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: Id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    
+# resources:
+#   Resources:
+#     usersTable:
+#       Type: AWS::DynamoDB::Table
+#       Properties:
+#         TableName: ${opt:stage}-storage
+#         AttributeDefinitions:
+#           - AttributeName: Id
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: Id
+#             KeyType: HASH
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1
