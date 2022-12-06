@@ -4,7 +4,7 @@
     "author": "Kratos",
     "dependencies": {
         "aws-serverless-express": "^3.3.6",
-        "express": "^4.17.1"
+        "express": "^4.18.2"
     },
     "devDependencies": {
         "@types/chai": "^4.2.4",
